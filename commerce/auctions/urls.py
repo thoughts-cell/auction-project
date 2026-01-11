@@ -15,5 +15,5 @@ urlpatterns = [
 
     path("watchlist/", views.bookmarks, name="bookmarks"),  # "watchlist" is standard for auctions
     path("categories/", views.CategoriesView.as_view(), name="categories"),
-    path("categories/<slug:slug>/", views.CategoryListings.as_view(), name="category_listings")
+    path("categories/<slug:slug>/", views.CategoryListings.as_view(), name="category")
 ]
