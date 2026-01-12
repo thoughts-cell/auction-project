@@ -16,7 +16,7 @@ class Listing(models.Model):
     is_active = models.BooleanField(default=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
-    active = models.BooleanField(default=True)
+    favoured =models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="favoured")
 
 
 
@@ -27,16 +27,20 @@ class Listing(models.Model):
             self.is_active = True
         super().save(*args, **kwargs)
 
+    def __str__(self):
+        return self.title
+    def get_absolute_url(self):
+        return reverse("listing", kwargs={"pk": self.pk})
 
 class Bid(models.Model):
 
     auction = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="bids")
 
-    # PROTECT  prevents deleting users who have active financial records
+ 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="bids")
 
     amount = models.DecimalField(decimal_places=2, max_digits=10)  # Increased max_digits
-    timestamp = models.DateTimeField(auto_now_add=True)  # Essential for auction history
+    timestamp = models.DateTimeField(auto_now_add=True)   
 
     def __str__(self):
         return f"${self.amount} on {self.auction.title} by {self.user.username}"
@@ -46,11 +50,17 @@ class Bid(models.Model):
         ordering = ['-amount']
 
 
-class Category:
+class Category(model.Model):
 
-    def _str(self):
-        pass
+    name = models.CharField(max_length=64, unique=True)
+    slug = models.SlugField(null = False, unique=True)
 
+    def __str__(self):
+        return self.name
+    class Meta:
+       verbose_name_plural = "categories"
+    def get_absolute_url(self):
+        return reverse("category", kwargs={"slug": self.slug})
 
 class Comment:
     auction = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name='comments')

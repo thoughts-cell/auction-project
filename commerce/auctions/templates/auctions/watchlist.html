@@ -1,0 +1,29 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>My Watchlist</h2>
+
+    <div class="row">
+        {% for listing in listings %}
+            <div class="col-md-4">
+                <div class="card">
+                    {% if listing.image_url %}
+                        <img src="{{ listing.image_url }}" class="card-img-top" alt="{{ listing.title }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ listing.title }}</h5>
+                        <p>Current Price: <strong>${{ listing.current_price }}</strong></p>
+                        <a href="{% url 'auction_view' listing.id %}" class="btn btn-primary">View Item</a>
+                        
+                        <form action="{% url 'add_to_watchlist' listing.id %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p>Your watchlist is currently empty.</p>
+        {% endfor %}
+    </div>
+{% endblock %}

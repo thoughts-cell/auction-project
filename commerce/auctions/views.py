@@ -116,9 +116,15 @@ def auction_view(request,pk):
                 "comments": auction.comment_set.all()  # Or auction.comments.all() if related_name set
             })
 
-class CategoryListings:
+class CategoryListings(ListView):
     template_name = "auctions/category_listings.html"
     model = Listing
+    context_object_name = 'listings'
+    
+    def get_queryset(self):
+        category_slug = self.kwargs['slug']
+        category = get_object_or_404(Category, slug=category_slug)
+        return Listing.objects.filter(category=category, is_active=True)
 
 
 def bookmarks(request):
