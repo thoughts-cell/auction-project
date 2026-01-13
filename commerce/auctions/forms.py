@@ -1,30 +1,30 @@
 from django import forms
-from auctions.models import Listing, Category, Bid,Comment
+from .models import Listing, Category, Bid, Comment
+
 
 class NewAuctionForm(forms.ModelForm):
     class Meta:
-        model =Listing
-        fields =['title','description','image_url', 'starting_bid']
+        model = Listing
+        fields = ['title', 'description', 'image_url', 'starting_bid']
 
 
-class BidForm:
-    def __init__(self,*args,**kwargs):
-        self.auction = kwargs.pop('auction')
-        super(BidForm,self).__init__(*args,**kwargs)
+class BidForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.auction = kwargs.pop('auction', None)
+        super(BidForm, self).__init__(*args, **kwargs)
 
-    def clean(self):
-        amount = self.cleand_data['amount']
-        if amount <= self.auction.current_price:
-            raise forms.ValidationError("Your bid is lower than current price")
-
-        return self.cleaned_data
+    def clean_amount(self):
+        amount = self.cleaned_data['amount']
+        if self.auction and amount <= self.auction.current_price:
+            raise forms.ValidationError("Your bid must be higher than the current price")
+        return amount
 
     class Meta:
         model = Bid
         fields = ['amount']
 
 
-class CommentForm:
+class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
         fields = ['body']

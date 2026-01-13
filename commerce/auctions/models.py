@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
 from django.conf import settings
+from django.urls import reverse
 class User(AbstractUser):
     pass
 
@@ -50,7 +50,7 @@ class Bid(models.Model):
         ordering = ['-amount']
 
 
-class Category(model.Model):
+class Category(models.Model):
 
     name = models.CharField(max_length=64, unique=True)
     slug = models.SlugField(null = False, unique=True)
@@ -62,7 +62,7 @@ class Category(model.Model):
     def get_absolute_url(self):
         return reverse("category", kwargs={"slug": self.slug})
 
-class Comment:
+class Comment(models.Model):
     auction = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name='comments')
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     body = models.TextField()

@@ -1,16 +1,16 @@
-from gc import get_objects
-
-from django.contrib.auth import authenticate, login, logout
+from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 
-from django.db import IntegrityError
+def index(request):
+    return render(request, "auctions/index.html")
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views.generic import ListView
 
 from .models import User, Listing, Bid, Category
-from .forms import NewAuctionForm ,BidForm,CommentForm
+from .forms import NewAuctionForm, BidForm, CommentForm
+
 
 def index(request):
     return render(request, "auctions/index.html")
@@ -18,7 +18,6 @@ def index(request):
 
 def login_view(request):
     if request.method == "POST":
-
         # Attempt to sign user in
         username = request.POST["username"]
         password = request.POST["password"]
@@ -68,19 +67,21 @@ def register(request):
         return render(request, "auctions/register.html")
 
 
-def auction_view(request,pk):
+def auction_view(request, pk):
     auction = get_object_or_404(Listing, pk=pk)
     favoured = False
     if request.user.is_authenticated:
-        favoured = auction.favourite.filter(user=request.user.id).exists()
-    #get top_bid using .first()
+        favoured = auction.favoured.filter(id=request.user.id).exists()
+    
+    # Get top bid using .first()
     top_bid = auction.bid_set.filter(user=request.user.id).first()
 
     if request.method == "POST":
         if not request.user.is_authenticated:
             return redirect("login")
+        
         if 'bid' in request.POST:
-            bid_form =BidForm(request.POST,auction =auction)
+            bid_form = BidForm(request.POST, auction=auction)
             if bid_form.is_valid():
                 temp = bid_form.save(commit=False)
                 temp.user = request.user
@@ -92,29 +93,29 @@ def auction_view(request,pk):
                 auction.save()
                 return redirect("auction_view", pk=auction.pk)
 
-            elif 'comment' in request.POST:
-                comment_form = CommentForm(request.POST)
-                if comment_form.is_valid():
-                    temp = comment_form.save(commit=False)
-                    temp.user = request.user
-                    temp.auction = auction
-                    temp.save()
-                    return redirect("auction_view", pk=auction.pk)
+        elif 'comment' in request.POST:
+            comment_form = CommentForm(request.POST)
+            if comment_form.is_valid():
+                temp = comment_form.save(commit=False)
+                temp.user = request.user
+                temp.auction = auction
+                temp.save()
+                return redirect("auction_view", pk=auction.pk)
 
-            else:
-                # 4. Use string for Decimal to ensure precision
-                minimum_bid = auction.current_price + Decimal("0.01")
-                bid_form = BidForm(initial={"amount": minimum_bid}, auction=auction)
-                comment_form = CommentForm()
+    # Default forms for GET request
+    minimum_bid = auction.current_price + Decimal("0.01")
+    bid_form = BidForm(initial={"amount": minimum_bid}, auction=auction)
+    comment_form = CommentForm()
 
-            return render(request, "auctions/auction_view.html", {
-                "auction": auction,
-                "bid_form": bid_form,
-                "favoured": favoured,
-                "top_bid": top_bid,
-                "comment_form": comment_form,
-                "comments": auction.comment_set.all()  # Or auction.comments.all() if related_name set
-            })
+    return render(request, "auctions/auction_view.html", {
+        "auction": auction,
+        "bid_form": bid_form,
+        "favoured": favoured,
+        "top_bid": top_bid,
+        "comment_form": comment_form,
+        "comments": auction.comment_set.all()
+    })
+
 
 class CategoryListings(ListView):
     template_name = "auctions/category_listings.html"
@@ -127,34 +128,46 @@ class CategoryListings(ListView):
         return Listing.objects.filter(category=category, is_active=True)
 
 
-def bookmarks(request):
-    return None
-
-
+@login_required
+def watchlist(request):
+    watched_items = request.user.favoured.all()
+    return render(request, "auctions/watchlist.html", {"listings": watched_items})
 
 
 @login_required
 def new_auction(request):
     if request.method == "POST":
         form = NewAuctionForm(request.POST)
-        if  form.is_valid():
+        if form.is_valid():
             auction = form.save(commit=False)
             auction.user = request.user
-            obj = form.save(commit=False)
-
-            obj.owner = request.user
-            obj.save()
+            auction.current_price = auction.starting_bid
+            auction.save()
             return HttpResponseRedirect(reverse("index"))
-        else:
-            form  = NewAuctionForm()
-        return render((request, "auctions/new_auction.html", {"form": form}))
-
-def end_auction(request):
-    return None
+    else:
+        form = NewAuctionForm()
+    return render(request, "auctions/new_auction.html", {"form": form})
 
 
-def favourite_post(request):
-    return None
+@login_required
+def end_auction(request, pk):
+    auction = get_object_or_404(Listing, pk=pk)
+    if request.user.is_authenticated and request.user == auction.user:
+        auction.is_active = False
+        auction.save()
+    return HttpResponseRedirect(reverse("auction_view", args=[pk]))
+
+
+@login_required
+def add_to_watchlist(request, pk):
+    listing = get_object_or_404(Listing, pk=pk)
+    if listing.favoured.filter(id=request.user.id).exists():
+        listing.favoured.remove(request.user)
+        messages.info(request, "Removed from watchlist")
+    else:
+        listing.favoured.add(request.user)
+        messages.info(request, "Added to watchlist")
+    return HttpResponseRedirect(reverse("auction_view", args=[pk]))
 
 
 class CategoriesView(ListView):
