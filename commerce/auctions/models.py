@@ -1,13 +1,17 @@
+from typing import Any
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.conf import settings
 from django.urls import reverse
+
+
 class User(AbstractUser):
     pass
 
 
 class Listing(models.Model):
-    title = models.CharField(max_length = 60)
+    title = models.CharField(max_length=60)
     description = models.TextField(max_length=1000)
     starting_bid = models.DecimalField(max_digits=10, decimal_places=2)
     current_price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -16,51 +20,56 @@ class Listing(models.Model):
     is_active = models.BooleanField(default=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
-    favoured =models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="favoured")
+    favoured = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="favoured")
 
-
+    def __init__(self, *args: Any, **kwargs: Any):
+        super().__init__(args, kwargs)
+        self.bid_set = None
+        self.comment_set = None
 
     def save(self, *args, **kwargs):
-        #Check if this is a new record
+        # Check if this is a new record
         if not self.pk:
             self.current_price = self.starting_bid
             self.is_active = True
+
         super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title
+
     def get_absolute_url(self):
         return reverse("listing", kwargs={"pk": self.pk})
 
-class Bid(models.Model):
 
+class Bid(models.Model):
     auction = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="bids")
 
- 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="bids")
 
     amount = models.DecimalField(decimal_places=2, max_digits=10)  # Increased max_digits
-    timestamp = models.DateTimeField(auto_now_add=True)   
+    timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"${self.amount} on {self.auction.title} by {self.user.username}"
 
     class Meta:
-
         ordering = ['-amount']
 
 
 class Category(models.Model):
-
     name = models.CharField(max_length=64, unique=True)
-    slug = models.SlugField(null = False, unique=True)
+    slug = models.SlugField(null=False, unique=True)
 
     def __str__(self):
         return self.name
+
     class Meta:
-       verbose_name_plural = "categories"
+        verbose_name_plural = "categories"
+
     def get_absolute_url(self):
         return reverse("category", kwargs={"slug": self.slug})
+
 
 class Comment(models.Model):
     auction = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name='comments')

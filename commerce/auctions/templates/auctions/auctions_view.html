@@ -1,0 +1,29 @@
+{% extends "auctions/layout.html"      %}
+{% load materializecss %}
+
+{% block body %}
+	<div class="card">
+        <div class="card-content">
+            <span class="card-title"><strong>{{ auction.title }}</strong></span>
+            <div class="row">
+                <div class="col s12 m6 s12">
+                    <div class="card">
+                        <div class="card-image">
+                            {%if auction.image_url % }
+                                <img class="materialboxed" src="{{ auction.image_url }}" style="max-height: 400px; object-fit: contain;">
+                            {% else %}
+                                <div class="grey lighten-3 center" style="padding: 50px;">No Image Provided</div>
+                        {% endif %}
+                        </div>
+                        {% if auction.is_active  %}
+                            <div class="row" style="margin-top:20px;">
+                            <div class="col s6">Starting: <strong>${{ auction.starting_bid }}</strong></div>
+                            <div class="col s6">Current: <strong>${{ auction.current_price }}</strong></div>
+                        </div>
+                     {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

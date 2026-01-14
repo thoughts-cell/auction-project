@@ -1,6 +1,18 @@
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
+from decimal import Decimal
 
+from django.contrib.admin.templatetags.admin_list import pagination
+from django.contrib.auth import authenticate, login, logout
+from django.db import IntegrityError
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
+from django.contrib.auth.decorators import login_required
+from django.views.generic.list import ListView
+from django.views.generic.detail import DetailView
+from django.views.generic.base import TemplateView
+from django.db.models import Max
+from django.views import View
+from django.contrib import messages
 def index(request):
     return render(request, "auctions/index.html")
 from django.http import HttpResponse, HttpResponseRedirect
@@ -12,8 +24,14 @@ from .models import User, Listing, Bid, Category
 from .forms import NewAuctionForm, BidForm, CommentForm
 
 
-def index(request):
-    return render(request, "auctions/index.html")
+def IndexListView(ListView):
+    model = Listing
+    template_name = "auctions/index.html"
+    paginate_by = 9
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
 
 
 def login_view(request):
@@ -67,6 +85,7 @@ def register(request):
         return render(request, "auctions/register.html")
 
 
+        
 def auction_view(request, pk):
     auction = get_object_or_404(Listing, pk=pk)
     favoured = False
@@ -148,6 +167,49 @@ def new_auction(request):
         form = NewAuctionForm()
     return render(request, "auctions/new_auction.html", {"form": form})
 
+def auction_view(request, pk):
+    auction = get_object_or_404(Listing, pk=pk)
+    favoured = False
+    if request.user.is_authenticated:
+        favoured = auction.favoured.filter(id=request.user.id).exists()
+
+    top_bid = auction.bid_set.order_by("-amount").first()
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            return redirect("login")
+
+        if 'bid' in request.POST:
+            bid_form = BidForm(request.POST, auction=auction)
+            if bid_form.is_valid():
+                temp = bid_form.save(commit=False)
+                temp.user = request.user
+                temp.auction =  auction
+                temp.save()
+
+                auction.current_price = temp.amount
+                auction.save()
+                return redirect("auction_view", pk=auction.pk)
+            elif 'comment' in request.POST:
+                comment_form = CommentForm(request.POST)
+                if comment_form.is_valid():
+                    temp = comment_form.save(commit=False)
+                    temp.user = request.user
+                    temp.auction = auction
+                    temp.save()
+                    return redirect("auction_view",pk = auction.pk)
+    else:
+        increment  = Decimal("0.01")
+        minimum_bid = auction.current_price + increment
+        bid_form = BidForm(initial={"amount": minimum_bid}, auction=auction)
+        comment_form = CommentForm()
+    return render(request,"auctions/auctions_view.html",{
+        "auction": auction,
+        "bid_form": bid_form,
+        "favoured": favoured,
+         "top_bid": top_bid,
+        "comment_form": comment_form,
+        "comments": auction.comments.all().order_by("-timestamp")
+    })
 
 @login_required
 def end_auction(request, pk):
