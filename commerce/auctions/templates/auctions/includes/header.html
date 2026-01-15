@@ -4,10 +4,10 @@
     <ul id="nav-mobile" class="right hide-on-med-and-down">
       <li><a href="{% url 'index' %}">Active Listings</a></li>
       <li><a href="{% url 'categories' %}">Categories</a></li>
-
+     <li><a href="{% url 'watchlist' %}">Watchlist</a></li>
 
       {% if user.is_authenticated %}
-        <li><a href="{% url 'watchlist' %}">Watchlist</a></li>
+
         <li><a href="{% url 'new_auction' %}">Create Listing</a></li>
         <li><a href="{% url 'logout' %}">Log Out ({{ user.username }})</a></li>
       {% else %}

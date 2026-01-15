@@ -31,20 +31,17 @@ class Listing(models.Model):
     image_url = models.URLField(blank=True, null=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL,null = True,blank=True, related_name="listings")
     is_active = models.BooleanField(default=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,related_name="listings")
 
-    favoured = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="favoured")
+    favoured = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="watched_listings")
 
-    def __init__(self, *args: Any, **kwargs: Any):
-        super().__init__(args, kwargs)
-        self.bid_set = None
-        self.comment_set = None
+
 
     def save(self, *args, **kwargs):
         # Check if this is a new record
         if not self.pk:
-            self.current_price = self.starting_bid
-            self.is_active = True
+            if not self.starting_bid:
+                self.starting_bid = self.current_price
 
         super().save(*args, **kwargs)
 
@@ -52,7 +49,7 @@ class Listing(models.Model):
         return self.title
 
     def get_absolute_url(self):
-        return reverse("listing", kwargs={"pk": self.pk})
+        return reverse("auction_view", kwargs={"pk": self.pk})
 
 
 class Bid(models.Model):
@@ -74,7 +71,7 @@ class Bid(models.Model):
 
 class Comment(models.Model):
     auction = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name='comments')
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posted_comments')
     body = models.TextField()
     created_on = models.DateTimeField(auto_now_add=True)
 
@@ -82,4 +79,5 @@ class Comment(models.Model):
         ordering = ['created_on']
 
     def __str__(self):
+        username = self.user.username if self.user else 'Anonymous'
         return f"{self.user} comment on {self.auction}"

@@ -41,7 +41,7 @@
                                         {%  if user == auction.user %}
                                             <a class="btn waves-effect waves-light red" href="{% url 'end_auction' pk=auction.pk %}">End auction</a>
                                         {% endif %}
-                                        <a class="btn waves-effect waves-light blue" href="{% url 'favourite_post' pk=auction.pk %}">"
+                                        <a class="btn waves-effect waves-light blue" href="{% url 'add_to_watchlist' pk=auction.pk %}">"
                                         </a>
                                     </div>
                                 </div>
