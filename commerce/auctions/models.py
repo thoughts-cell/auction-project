@@ -10,13 +10,26 @@ class User(AbstractUser):
     pass
 
 
+class Category(models.Model):
+    name = models.CharField(max_length=64, unique=True)
+    slug = models.SlugField(null=False, unique=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural = "categories"
+
+    def get_absolute_url(self):
+        return reverse("category_listings", kwargs={"slug": self.slug})
+
 class Listing(models.Model):
     title = models.CharField(max_length=60)
     description = models.TextField(max_length=1000)
     starting_bid = models.DecimalField(max_digits=10, decimal_places=2)
     current_price = models.DecimalField(max_digits=10, decimal_places=2)
     image_url = models.URLField(blank=True, null=True)
-    category = models.CharField(max_length=64, blank=True)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL,null = True,blank=True, related_name="listings")
     is_active = models.BooleanField(default=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
@@ -57,18 +70,6 @@ class Bid(models.Model):
         ordering = ['-amount']
 
 
-class Category(models.Model):
-    name = models.CharField(max_length=64, unique=True)
-    slug = models.SlugField(null=False, unique=True)
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        verbose_name_plural = "categories"
-
-    def get_absolute_url(self):
-        return reverse("category", kwargs={"slug": self.slug})
 
 
 class Comment(models.Model):

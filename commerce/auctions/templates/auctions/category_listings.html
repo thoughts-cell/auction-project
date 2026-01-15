@@ -1,0 +1,40 @@
+    {% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h4>{{ category.name }} Listings</h4> <div class="row">
+    {% for auction in object_list %}
+        <div class="col s12 m6 l4">
+            <div class="card hoverable"> <div class="card-content">
+                    <span class="card-title truncate">
+                        <a href="{% url 'auction_view' pk=auction.id %}">{{ auction.title }}</a>
+                    </span>
+                    
+                    <div class="card-image">
+                        {% if auction.image_url %}
+                            <img class="materialboxed" src="{{ auction.image_url }}" style="height: 200px; object-fit: cover;" alt="">
+                        {% else %}
+                            <div class="grey lighten-3 center" style="height: 200px; line-height: 200px;">No Image</div>
+                        {% endif %}
+                    </div>
+
+                    <div style="margin-top: 15px; height: 60px; overflow: hidden;">
+                        <p>{{ auction.description|truncatewords:20 }}</p>
+                    </div>
+                </div>
+                
+                <div class="card-action">
+                    <span class="blue-text text-darken-2"><strong>${{ auction.current_price }}</strong></span>
+                    <a href="{% url 'auction_view' pk=auction.id %}" class="right">Bid Now</a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col s12">
+            <div class="card-panel yellow lighten-4">
+                No active listings for the <strong>{{ category.name }}</strong> category.
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+
+{% endblock %}

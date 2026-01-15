@@ -1,0 +1,19 @@
+<nav class="blue darken-3">
+  <div class="nav-wrapper container">
+    <a href="{% url 'index' %}" class="brand-logo">Auctions</a>
+    <ul id="nav-mobile" class="right hide-on-med-and-down">
+      <li><a href="{% url 'index' %}">Active Listings</a></li>
+      <li><a href="{% url 'categories' %}">Categories</a></li>
+
+
+      {% if user.is_authenticated %}
+        <li><a href="{% url 'watchlist' %}">Watchlist</a></li>
+        <li><a href="{% url 'new_auction' %}">Create Listing</a></li>
+        <li><a href="{% url 'logout' %}">Log Out ({{ user.username }})</a></li>
+      {% else %}
+        <li><a href="{% url 'login' %}">Log In</a></li>
+        <li><a href="{% url 'register' %}">Register</a></li>
+      {% endif %}
+    </ul>
+  </div>
+</nav>

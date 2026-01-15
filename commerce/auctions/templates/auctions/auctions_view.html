@@ -9,21 +9,89 @@
                 <div class="col s12 m6 s12">
                     <div class="card">
                         <div class="card-image">
-                            {%if auction.image_url % }
+                        {%if auction.image_url %}
                                 <img class="materialboxed" src="{{ auction.image_url }}" style="max-height: 400px; object-fit: contain;">
                             {% else %}
                                 <div class="grey lighten-3 center" style="padding: 50px;">No Image Provided</div>
-                        {% endif %}
+                         {% endif %}
                         </div>
+
                         {% if auction.is_active  %}
                             <div class="row" style="margin-top:20px;">
                             <div class="col s6">Starting: <strong>${{ auction.starting_bid }}</strong></div>
+
                             <div class="col s6">Current: <strong>${{ auction.current_price }}</strong></div>
+
+                            </div>
+                            {% if user.is_authenticated %}
+                                <div class="row" >
+                                <form class="col s12" method="post" action="">
+                                {% csrf_token %}
+                                <div class="input-field col s8">
+                                    {{ bid_form|materializecss }}
+                                </div>
+                                <div class="input-field col s4">
+                                    <button class="btn waves-effect waves-light orange" type="submit" name="bid">Bid</button>
+                                </div>
+                                 </form>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col s12" >
+                                        {%  if user == auction.user %}
+                                            <a class="btn waves-effect waves-light red" href="{% url 'end_auction' pk=auction.pk %}">End auction</a>
+                                        {% endif %}
+                                        <a class="btn waves-effect waves-light blue" href="{% url 'favourite_post' pk=auction.pk %}">"
+                                        </a>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <p class="orange-text"> Log in before you place a bid .</p>
+                                {% endif %}
+                            {% else %}
+                                <div class="card-panel green lighten-4">
+                                <strong>Auction Closed.</strong>
+                                Winner:{{ top_bid.user|default:"None" }}
+                                (${{ top_bid.amount|default:"0" }}
+                                </div>
+
                         </div>
-                     {% endif %}
+
+                      {% endif %}
+                    </div>
+                    <div class="col l6 m6 s12">
+                                <h5>Description</h5>
+                                 <p><p style="white-space: pre-wrap;">{{ auction.description }}</p>
                     </div>
                 </div>
+
+
+            <hr>
+
+            <div class="row">
+                <h4 >Comments:</h4>
+                {% for comment in comments %}
+                    <div class="card-panel green lighten-4 z-depth-1  ">
+                        <span class="blue-text text-darken-2"><strong>{{ comment.user }}</strong></span>
+                        <span class="grey-text" style="font-size: 0.8rem;">{{ comment.created_on }}</span>
+                        <p>{{ comment.body }}</p>
+                    </div>
+                {% empty %}
+                  <p class="grey-text font-italic">No comments yet.</p>
+                {% endfor %}
+                {% if user.is_authenticated %}
+                    <h5>Post your comment:</h5>
+                    <form method="post" action="">
+                        {% csrf_token %}
+                        <div class="input-field col s12 m8">
+                            {{ comment_form|materializecss }}
+                        </div>
+                        <div class="input-field col s12 m4">
+                            <button class="btn waves-effect waves-light orange" type="submit" name="comment">Submit</button>
+                        </div>
+                    </form>
+                {% endif %}
             </div>
         </div>
     </div>
-{% endblock %}
+{%endblock body %}
