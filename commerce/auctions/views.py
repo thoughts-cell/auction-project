@@ -1,33 +1,25 @@
 from decimal import Decimal
-
 from django.contrib.admin.templatetags.admin_list import pagination
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404, redirect
-from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from django.views.generic.list import ListView
-from django.views.generic.detail import DetailView
-from django.views.generic.base import TemplateView
-from django.db.models import Max
-from django.views import View
 from django.contrib import messages
-def index(request):
-    return render(request, "auctions/index.html")
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views.generic import ListView
 
-from .models import User, Listing, Bid, Category
+from .models import User, Listing,  Category
 from .forms import NewAuctionForm, BidForm, CommentForm
 
 
-def IndexListView(ListView):
+class IndexListView(ListView):
     model = Listing
     template_name = "auctions/index.html"
     paginate_by = 9
+
+    def get_queryset(self):
+        return Listing.objects.filter(is_active=True).order_by("-id")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

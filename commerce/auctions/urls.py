@@ -2,7 +2,7 @@ from django.urls import path
 import auctions.views as views
 
 urlpatterns = [
-    path("", views.index, name="index"),
+    path("", views.IndexListView.as_view(), name="index"),
     path("login/", views.login_view, name="login"),
     path("logout/", views.logout_view, name="logout"),
     path("register/", views.register, name="register"),

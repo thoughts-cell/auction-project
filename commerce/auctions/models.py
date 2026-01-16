@@ -32,7 +32,7 @@ class Listing(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL,null = True,blank=True, related_name="listings")
     is_active = models.BooleanField(default=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,related_name="listings")
-    favoured = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="watched_listings")
+    favoured = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="favoured")
 
 
 
