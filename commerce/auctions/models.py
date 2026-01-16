@@ -56,7 +56,7 @@ class Bid(models.Model):
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="bids")
 
-    amount = models.DecimalField(decimal_places=2, max_digits=10)  # Increased max_digits
+    amount = models.DecimalField(decimal_places=2, max_digits=10)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

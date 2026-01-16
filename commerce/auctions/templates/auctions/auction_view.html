@@ -1,5 +1,5 @@
 {% extends "auctions/layout.html"      %}
-{% load materializecss %}
+
 
 {% block body %}
 	<div class="card">
@@ -28,7 +28,7 @@
                                 <form class="col s12" method="post" action="">
                                 {% csrf_token %}
                                 <div class="input-field col s8">
-                                    {{ bid_form|materializecss }}
+                                    {{ bid_form}}
                                 </div>
                                 <div class="input-field col s4">
                                     <button class="btn waves-effect waves-light orange" type="submit" name="bid">Bid</button>
@@ -41,7 +41,7 @@
                                         {%  if user == auction.user %}
                                             <a class="btn waves-effect waves-light red" href="{% url 'end_auction' pk=auction.pk %}">End auction</a>
                                         {% endif %}
-                                        <a class="btn waves-effect waves-light blue" href="{% url 'add_to_watchlist' pk=auction.pk %}">"
+                                        <a class="btn waves-effect waves-light blue" href="{% url 'add_to_watchlist' pk=auction.pk %}">
                                         </a>
                                     </div>
                                 </div>
@@ -84,7 +84,7 @@
                     <form method="post" action="">
                         {% csrf_token %}
                         <div class="input-field col s12 m8">
-                            {{ comment_form|materializecss }}
+                            {{ comment_form }}
                         </div>
                         <div class="input-field col s12 m4">
                             <button class="btn waves-effect waves-light orange" type="submit" name="comment">Submit</button>

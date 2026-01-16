@@ -114,20 +114,25 @@ def new_auction(request):
 def auction_view(request, pk):
     auction = get_object_or_404(Listing, pk=pk)
     favoured = False
+    increment = Decimal("0.01")
+    minimum_bid = auction.current_price + increment
+    bid_form =BidForm(initial={"amount":minimum_bid}, auction=auction)
+    comment_form = CommentForm()
     if request.user.is_authenticated:
         favoured = auction.favoured.filter(id = request.user.id).exists()
 
-    top_bid = auction.bid_set.order_by("-amount").first()
+    top_bid = auction.bids.order_by("-amount").first()
+
     if request.method == 'POST':
         if not request.user.is_authenticated:
             return redirect("login")
 
         if 'bid' in request.POST:
-            bid_form = BidForm(request.POST, auction=auction)
+            bid_form = BidForm(request.POST,auction=auction)
             if bid_form.is_valid():
                 temp = bid_form.save(commit=False)
                 temp.user = request.user
-                temp.auction =  auction
+                temp.auction = auction
                 temp.save()
 
                 #update the price
@@ -144,10 +149,7 @@ def auction_view(request, pk):
                     temp.save()
                     return redirect("auction_view",pk = auction.pk)
 
-        increment  = Decimal("0.01")
-        minimum_bid = auction.current_price + increment
-        bid_form = BidForm(initial={"amount": minimum_bid}, auction=auction)
-        comment_form = CommentForm()
+
     return render(request,"auctions/auction_view.html",{
         "auction": auction,
         "bid_form": bid_form,

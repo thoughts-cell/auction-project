@@ -39,5 +39,24 @@
             <p class="center-align grey-text">No active listings available right now.</p>
         </div>
     {% endfor %}
+    {% if is_paginated %}
+    <div class="row center">
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+                <li class="waves-effect"><a href="?page={{ page_obj.previous_page_number }}"><i class="material-icons">chevron_left</i></a></li>
+            {% else %}
+                <li class="disabled"><a href="#!"><i class="material-icons">chevron_left</i></a></li>
+            {% endif %}
+
+            <li class="active orange darken-4"><a href="#!">{{ page_obj.number }}</a></li>
+
+            {% if page_obj.has_next %}
+                <li class="waves-effect"><a href="?page={{ page_obj.next_page_number }}"><i class="material-icons">chevron_right</i></a></li>
+            {% else %}
+                <li class="disabled"><a href="#!"><i class="material-icons">chevron_right</i></a></li>
+            {% endif %}
+        </ul>
+    </div>
+    {% endif %}
     </div>
 {% endblock %}
