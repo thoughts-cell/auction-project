@@ -32,13 +32,12 @@ class Listing(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL,null = True,blank=True, related_name="listings")
     is_active = models.BooleanField(default=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,related_name="listings")
-
     favoured = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="watched_listings")
 
 
 
     def save(self, *args, **kwargs):
-        # Check if this is a new record
+
         if not self.pk:
             if not self.starting_bid:
                 self.starting_bid = self.current_price

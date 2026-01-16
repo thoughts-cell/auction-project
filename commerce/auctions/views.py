@@ -86,54 +86,6 @@ def register(request):
 
 
         
-def auction_view(request, pk):
-    auction = get_object_or_404(Listing, pk=pk)
-    favoured = False
-    if request.user.is_authenticated:
-        favoured = auction.favoured.filter(id=request.user.id).exists()
-    
-    # Get top bid using .first()
-    top_bid = auction.bid_set.filter(user=request.user.id).first()
-
-    if request.method == "POST":
-        if not request.user.is_authenticated:
-            return redirect("login")
-        
-        if 'bid' in request.POST:
-            bid_form = BidForm(request.POST, auction=auction)
-            if bid_form.is_valid():
-                temp = bid_form.save(commit=False)
-                temp.user = request.user
-                temp.auction = auction
-                temp.save()
-
-                # Sync price
-                auction.current_price = temp.amount
-                auction.save()
-                return redirect("auction_view", pk=auction.pk)
-
-        elif 'comment' in request.POST:
-            comment_form = CommentForm(request.POST)
-            if comment_form.is_valid():
-                temp = comment_form.save(commit=False)
-                temp.user = request.user
-                temp.auction = auction
-                temp.save()
-                return redirect("auction_view", pk=auction.pk)
-
-    # Default forms for GET request
-    minimum_bid = auction.current_price + Decimal("0.01")
-    bid_form = BidForm(initial={"amount": minimum_bid}, auction=auction)
-    comment_form = CommentForm()
-
-    return render(request, "auctions/auction_view.html", {
-        "auction": auction,
-        "bid_form": bid_form,
-        "favoured": favoured,
-        "top_bid": top_bid,
-        "comment_form": comment_form,
-        "comments": auction.comment_set.all()
-    })
 
 
 class CategoryListings(ListView):
@@ -171,7 +123,7 @@ def auction_view(request, pk):
     auction = get_object_or_404(Listing, pk=pk)
     favoured = False
     if request.user.is_authenticated:
-        favoured = auction.favoured.filter(id=request.user.id).exists()
+        favoured = auction.favoured.filter(id = request.user.id).exists()
 
     top_bid = auction.bid_set.order_by("-amount").first()
     if request.method == 'POST':
@@ -186,9 +138,11 @@ def auction_view(request, pk):
                 temp.auction =  auction
                 temp.save()
 
+                #update the price
                 auction.current_price = temp.amount
                 auction.save()
                 return redirect("auction_view", pk=auction.pk)
+
             elif 'comment' in request.POST:
                 comment_form = CommentForm(request.POST)
                 if comment_form.is_valid():
@@ -197,18 +151,18 @@ def auction_view(request, pk):
                     temp.auction = auction
                     temp.save()
                     return redirect("auction_view",pk = auction.pk)
-    else:
+
         increment  = Decimal("0.01")
         minimum_bid = auction.current_price + increment
         bid_form = BidForm(initial={"amount": minimum_bid}, auction=auction)
         comment_form = CommentForm()
-    return render(request,"auctions/auctions_view.html",{
+    return render(request,"auctions/auction_view.html",{
         "auction": auction,
         "bid_form": bid_form,
         "favoured": favoured,
          "top_bid": top_bid,
         "comment_form": comment_form,
-        "comments": auction.comments.all().order_by("-timestamp")
+        "comments": auction.comments.all().order_by("-created_on")
     })
 
 @login_required
@@ -235,7 +189,4 @@ def add_to_watchlist(request, pk):
 class CategoriesView(ListView):
     template_name = "auctions/categories.html"
     model = Category
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
+    context_object_name = "categories"
