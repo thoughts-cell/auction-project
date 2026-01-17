@@ -29,7 +29,7 @@ class Listing(models.Model):
     starting_bid = models.DecimalField(max_digits=10, decimal_places=2)
     current_price = models.DecimalField(max_digits=10, decimal_places=2)
     image_url = models.URLField(blank=True, null=True)
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL,null = True,blank=True, related_name="listings")
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL,null = True,blank=False, related_name="category_listings")
     is_active = models.BooleanField(default=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,related_name="listings")
     favoured = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="favoured")

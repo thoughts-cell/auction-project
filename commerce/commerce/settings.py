@@ -36,12 +36,13 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'auctions',
-
+    'materializecssform',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'auctions.context_processors.categories_processor',
     'django.contrib.staticfiles',
 ]
 

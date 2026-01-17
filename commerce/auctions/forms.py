@@ -5,12 +5,13 @@ from .models import Listing, Category, Bid, Comment
 class NewAuctionForm(forms.ModelForm):
     class Meta:
         model = Listing
-        fields = ['title', 'description', 'image_url', 'starting_bid']
+        fields = ['title', 'description', 'image_url', 'starting_bid','category']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'validate'}),
             'description': forms.Textarea(attrs={'class': 'materialize-textarea'}),
             'image_url': forms.URLInput(attrs={'placeholder': 'https://example.com/image.jpg'}),
             'starting_bid': forms.NumberInput(attrs={'step': '0.01'}),
+            'category':forms.Select(attrs={'class':'browser-default'}),
         }
         labels = {
             'title': 'product name',

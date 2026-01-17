@@ -82,7 +82,7 @@ def register(request):
 
 class CategoryListings(ListView):
     template_name = "auctions/category_listings.html"
-    model = Listing
+    muodel = Listing
     context_object_name = 'listings'
     
     def get_queryset(self):
@@ -118,6 +118,7 @@ def auction_view(request, pk):
     minimum_bid = auction.current_price + increment
     bid_form =BidForm(initial={"amount":minimum_bid}, auction=auction)
     comment_form = CommentForm()
+   
     if request.user.is_authenticated:
         favoured = auction.favoured.filter(id = request.user.id).exists()
 

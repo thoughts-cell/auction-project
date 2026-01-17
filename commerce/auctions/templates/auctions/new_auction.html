@@ -2,34 +2,11 @@
 {% load materializecss %}
 
 {% block body %}
-<div class="row" style="margin-top: 20px;">
-    <div class="col s12 m10 offset-m1 l8 offset-l2">
-        <div class="card">
-            <div class="card-content">
-                <span class="card-title center-align">
-                    <i class="material-icons left">add_circle</i>Create New Auction Listing
-                </span>
-
-                <p class="grey-text center-align" style="margin-bottom: 20px;">
-                    Fill out the details below to put your item up for auction.
-                </p>
-
-                <form method="POST" action="{% url 'new_auction' %}">
-                    {% csrf_token %}
-
-                    <div class="row">
-                        {{ form |materializecss}}
-                    </div>
-
-                    <div class="card-action center-align">
-                        <button type="submit" class="btn-large waves-effect waves-light orange darken-3">
-                            <i class="material-icons right">publish</i>Create Listing
-                        </button>
-                        <a href="{% url 'index' %}" class="btn-large btn-flat waves-effect">Cancel</a>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+    <h2> creat a new auction</h2><br>
+    <form action = "" method="post">
+        {% csrf_token %}
+        {{form|materializecss}}
+         <br>
+        <button class="btn waves-effect waves-light orange" type="submit" name="action">Add</button>
+    </form>
 {% endblock %}

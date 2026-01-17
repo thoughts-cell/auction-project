@@ -1,97 +1,134 @@
-{% extends "auctions/layout.html"      %}
-
+{% extends "auctions/layout.html" %}
 
 {% block body %}
-	<div class="card">
+<div class="container">
+    <div class="card">
         <div class="card-content">
             <span class="card-title"><strong>{{ auction.title }}</strong></span>
+            
             <div class="row">
-                <div class="col s12 m6 s12">
-                    <div class="card">
+                <div class="col s12 m6">
+                    <div class="card z-depth-0 grey lighten-5">
                         <div class="card-image">
-                        {%if auction.image_url %}
-                                <img class="materialboxed" src="{{ auction.image_url }}" style="max-height: 400px; object-fit: contain;">
+                            {% if auction.image_url %}
+                                <img class="materialboxed" src="{{ auction.image_url }}" style="max-height: 400px; object-fit: contain; margin: 0 auto;">
                             {% else %}
-                                <div class="grey lighten-3 center" style="padding: 50px;">No Image Provided</div>
-                         {% endif %}
+                                <div class="grey lighten-2 center" style="padding: 80px 0;">
+                                    <i class="material-icons large grey-text">image</i>
+                                    <p class="grey-text">No Image Provided</p>
+                                </div>
+                            {% endif %}
                         </div>
 
-                        {% if auction.is_active  %}
-                            <div class="row" style="margin-top:20px;">
-                            <div class="col s6">Starting: <strong>${{ auction.starting_bid }}</strong></div>
-
-                            <div class="col s6">Current: <strong>${{ auction.current_price }}</strong></div>
-
-                            </div>
-                            {% if user.is_authenticated %}
-                                <div class="row" >
-                                <form class="col s12" method="post" action="">
-                                {% csrf_token %}
-                                <div class="input-field col s8">
-                                    {{ bid_form}}
-                                </div>
-                                <div class="input-field col s4">
-                                    <button class="btn waves-effect waves-light orange" type="submit" name="bid">Bid</button>
-                                </div>
-                                 </form>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col s12" >
-                                        {%  if user == auction.user %}
-                                            <a class="btn waves-effect waves-light red" href="{% url 'end_auction' pk=auction.pk %}">End auction</a>
-                                        {% endif %}
-                                        <a class="btn waves-effect waves-light blue" href="{% url 'add_to_watchlist' pk=auction.pk %}">
-                                        </a>
+                        <div class="card-content">
+                            {% if auction.is_active %}
+                                <div class="row" style="margin-bottom: 0;">
+                                    <div class="col s6">
+                                        <p class="grey-text">Starting Bid</p>
+                                        <h5 class="black-text">${{ auction.starting_bid }}</h5>
+                                    </div>
+                                    <div class="col s6">
+                                        <p class="grey-text">Current Price</p>
+                                        <h5 class="blue-text text-darken-2">${{ auction.current_price }}</h5>
                                     </div>
                                 </div>
+
+                                {% if user.is_authenticated %}
+                                    <form method="post" action="" style="margin-top: 20px;">
+                                        {% csrf_token %}
+                                        <div class="row valign-wrapper">
+                                            <div class="input-field col s8">
+                                                {{ bid_form }}
+                                                <span class="helper-text">Enter at least ${{ auction.current_price|add:"0.01" }}</span>
+                                            </div>
+                                            <div class="input-field col s4">
+                                                <button class="btn waves-effect waves-light orange full-width" type="submit" name="bid">Bid</button>
+                                            </div>
+                                        </div>
+                                    </form>
+
+                                    <div class="row">
+                                        <div class="col s12">
+                                            {% if user == auction.user %}
+                                                <a class="btn waves-effect waves-light red" href="{% url 'end_auction' pk=auction.pk %}">End Auction</a>
+                                            {% endif %}
+                                            
+                                            <a class="btn waves-effect waves-light blue" href="{% url 'add_to_watchlist' pk=auction.pk %}">
+                                                {% if favoured %} Remove Watchlist {% else %} Add Watchlist {% endif %}
+                                            </a>
+                                        </div>
+                                    </div>
                                 {% else %}
-                                <p class="orange-text"> Log in before you place a bid .</p>
+                                    <p class="orange-text center-align">Please <a href="{% url 'login' %}">Log In</a> to place a bid.</p>
                                 {% endif %}
+
                             {% else %}
-                                <div class="card-panel green lighten-4">
-                                <strong>Auction Closed.</strong>
-                                Winner:{{ top_bid.user|default:"None" }}
-                                (${{ top_bid.amount|default:"0" }}
+                                <div class="card-panel green lighten-4 green-text text-darken-4 center-align">
+                                    <i class="material-icons">check_circle</i>
+                                    <h5>Auction Closed</h5>
+                                    <p>Winner: <strong>{{ top_bid.user|default:"No Bids" }}</strong></p>
+                                    <p>Final Price: <strong>${{ auction.current_price }}</strong></p>
                                 </div>
-
+                            {% endif %}
                         </div>
-
-                      {% endif %}
-                    </div>
-                    <div class="col l6 m6 s12">
-                                <h5>Description</h5>
-                                 <p><p style="white-space: pre-wrap;">{{ auction.description }}</p>
                     </div>
                 </div>
 
+                <div class="col s12 m6">
+                    <h5 class="grey-text text-darken-2">Description</h5>
+                    <div class="divider"></div>
+                    <p style="white-space: pre-wrap; margin-top: 15px; line-height: 1.6;">{{ auction.description }}</p>
+                    
+                    <p style="margin-top: 20px;">
+                        <span class="chip blue white-text">{{ auction.category|default:"No Category" }}</span>
+                        <span class="chip">Owner: {{ auction.user }}</span>
+                    </p>
+                </div>
+            </div>
 
-            <hr>
+            <div class="divider"></div>
 
-            <div class="row">
-                <h4 >Comments:</h4>
-                {% for comment in comments %}
-                    <div class="card-panel green lighten-4 z-depth-1  ">
-                        <span class="blue-text text-darken-2"><strong>{{ comment.user }}</strong></span>
-                        <span class="grey-text" style="font-size: 0.8rem;">{{ comment.created_on }}</span>
-                        <p>{{ comment.body }}</p>
-                    </div>
-                {% empty %}
-                  <p class="grey-text font-italic">No comments yet.</p>
-                {% endfor %}
-                {% if user.is_authenticated %}
-                    <h5>Post your comment:</h5>
-                    <form method="post" action="">
-                        {% csrf_token %}
-                        <div class="input-field col s12 m8">
-                            {{ comment_form }}
+            <div class="row" style="margin-top: 30px;">
+                <div class="col s12">
+                    <h5>Comments ({{ comments.count }})</h5>
+                    {% for comment in comments %}
+                        <div class="card-panel grey lighten-4 z-depth-0" style="border-left: 5px solid #2196f3;">
+                            <div class="valign-wrapper">
+                                <strong class="blue-text text-darken-2">{{ comment.user }}</strong>
+                                <span class="grey-text ml-10" style="font-size: 0.8rem; margin-left: 10px;">{{ comment.created_on|date:"M d, Y H:i" }}</span>
+                            </div>
+                            <p style="margin-top: 10px;">{{ comment.body }}</p>
                         </div>
-                        <div class="input-field col s12 m4">
-                            <button class="btn waves-effect waves-light orange" type="submit" name="comment">Submit</button>
+                    {% empty %}
+                        <p class="grey-text center-align italic" style="padding: 20px;">No comments yet.</p>
+                    {% endfor %}
+
+                    {% if user.is_authenticated %}
+                        <div class="row" style="margin-top: 40px;">
+                            <form method="post" action="">
+                                {% csrf_token %}
+                                <div class="input-field col s12 m10">
+                                    <i class="material-icons prefix">comment</i>
+                                    {{ comment_form }}
+                                </div>
+                                <div class="input-field col s12 m2">
+                                    <button class="btn-floating btn-large waves-effect waves-light orange" type="submit" name="comment">
+                                        <i class="material-icons">send</i>
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                    </form>
-                {% endif %}
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
-{%endblock body %}
+</div>
+
+<style>
+    .ml-10 { margin-left: 10px; }
+    .full-width { width: 100%; }
+    .card-title { border-bottom: 2px solid #f1f1f1; padding-bottom: 10px; margin-bottom: 20px !important; }
+</style>
+
+{% endblock %}
