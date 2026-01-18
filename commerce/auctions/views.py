@@ -180,8 +180,22 @@ def add_to_watchlist(request, pk):
         messages.info(request, "Added to watchlist")
     return HttpResponseRedirect(reverse("auction_view", args=[pk]))
 
-
+def categories_processors(request):
+    from .models import Category
+    return {
+        'all_categories':Category.objects.all().order_by('name')
+    }
 class CategoriesView(ListView):
     template_name = "auctions/categories.html"
     model = Category
     context_object_name = "categories"
+
+def category_listings(request,slug):
+    #show the products under  a certain category
+    category = get_object_or_404(Category,slug=slug)
+    listings = category.category_listings.filter(is_active = True)
+
+    return render(request,"auctions/category_listings.html",{
+        "category":category
+    })
+    
