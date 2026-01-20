@@ -24,7 +24,7 @@ To follow industry best practices, this project uses **environment variables** t
 ### 1. Clone the repository
  ```bash
 git clone [https://github.com/thoughts-cell/auction-project](https://github.com/thoughts-cell/auction-project)
-cd commerce
+cd auction-project/commerce
  ```
 
 ### 2. Install Dependencies
@@ -44,8 +44,10 @@ python setup_env.py
 Apply the migrations to initialize the SQLite database:
 
  
-
+```bash
 python manage.py migrate
+```
+
 ### 5. Start the Server
 
 ```Bash
