@@ -1,16 +1,16 @@
 from decimal import Decimal
-from django.contrib.admin.templatetags.admin_list import pagination
-from django.contrib.auth import authenticate, login, logout
-from django.db import IntegrityError
-from django.contrib.auth.decorators import login_required
+
 from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.db import IntegrityError
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views.generic import ListView
 
-from .models import User, Listing,  Category
 from .forms import NewAuctionForm, BidForm, CommentForm
+from .models import User, Listing, Category
 
 
 class IndexListView(ListView):
@@ -77,14 +77,11 @@ def register(request):
         return render(request, "auctions/register.html")
 
 
-        
-
-
 class CategoryListings(ListView):
     template_name = "auctions/category_listings.html"
     muodel = Listing
     context_object_name = 'listings'
-    
+
     def get_queryset(self):
         category_slug = self.kwargs['slug']
         category = get_object_or_404(Category, slug=category_slug)
@@ -111,16 +108,17 @@ def new_auction(request):
         form = NewAuctionForm()
     return render(request, "auctions/new_auction.html", {"form": form})
 
+
 def auction_view(request, pk):
     auction = get_object_or_404(Listing, pk=pk)
     favoured = False
     increment = Decimal("0.01")
     minimum_bid = auction.current_price + increment
-    bid_form =BidForm(initial={"amount":minimum_bid}, auction=auction)
+    bid_form = BidForm(initial={"amount": minimum_bid}, auction=auction)
     comment_form = CommentForm()
-   
+
     if request.user.is_authenticated:
-        favoured = auction.favoured.filter(id = request.user.id).exists()
+        favoured = auction.favoured.filter(id=request.user.id).exists()
 
     top_bid = auction.bids.order_by("-amount").first()
 
@@ -129,14 +127,14 @@ def auction_view(request, pk):
             return redirect("login")
 
         if 'bid' in request.POST:
-            bid_form = BidForm(request.POST,auction=auction)
+            bid_form = BidForm(request.POST, auction=auction)
             if bid_form.is_valid():
                 temp = bid_form.save(commit=False)
                 temp.user = request.user
                 temp.auction = auction
                 temp.save()
 
-                #update the price
+                # update the price
                 auction.current_price = temp.amount
                 auction.save()
                 return redirect("auction_view", pk=auction.pk)
@@ -148,17 +146,17 @@ def auction_view(request, pk):
                     temp.user = request.user
                     temp.auction = auction
                     temp.save()
-                    return redirect("auction_view",pk = auction.pk)
+                    return redirect("auction_view", pk=auction.pk)
 
-
-    return render(request,"auctions/auction_view.html",{
+    return render(request, "auctions/auction_view.html", {
         "auction": auction,
         "bid_form": bid_form,
         "favoured": favoured,
-         "top_bid": top_bid,
+        "top_bid": top_bid,
         "comment_form": comment_form,
         "comments": auction.comments.all().order_by("-created_on")
     })
+
 
 @login_required
 def end_auction(request, pk):
@@ -180,22 +178,25 @@ def add_to_watchlist(request, pk):
         messages.info(request, "Added to watchlist")
     return HttpResponseRedirect(reverse("auction_view", args=[pk]))
 
+
 def categories_processors(request):
     from .models import Category
     return {
-        'all_categories':Category.objects.all().order_by('name')
+        'all_categories': Category.objects.all().order_by('name')
     }
+
+
 class CategoriesView(ListView):
     template_name = "auctions/categories.html"
     model = Category
     context_object_name = "categories"
 
-def category_listings(request,slug):
-    #show the products under  a certain category
-    category = get_object_or_404(Category,slug=slug)
-    listings = category.category_listings.filter(is_active = True)
 
-    return render(request,"auctions/category_listings.html",{
-        "category":category
+def category_listings(request, slug):
+    # show the products under  a certain category
+    category = get_object_or_404(Category, slug=slug)
+    listings = category.category_listings.filter(is_active=True)
+
+    return render(request, "auctions/category_listings.html", {
+        "category": category
     })
-    

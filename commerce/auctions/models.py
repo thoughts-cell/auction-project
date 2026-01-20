@@ -1,8 +1,6 @@
-from typing import Any
-
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.conf import settings
 from django.urls import reverse
 
 
@@ -23,18 +21,18 @@ class Category(models.Model):
     def get_absolute_url(self):
         return reverse("category_listings", kwargs={"slug": self.slug})
 
+
 class Listing(models.Model):
     title = models.CharField(max_length=60)
     description = models.TextField(max_length=1000)
     starting_bid = models.DecimalField(max_digits=10, decimal_places=2)
     current_price = models.DecimalField(max_digits=10, decimal_places=2)
     image_url = models.URLField(blank=True, null=True)
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL,null = True,blank=False, related_name="category_listings")
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=False,
+                                 related_name="category_listings")
     is_active = models.BooleanField(default=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,related_name="listings")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="listings")
     favoured = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="favoured")
-
-
 
     def save(self, *args, **kwargs):
 
@@ -64,8 +62,6 @@ class Bid(models.Model):
 
     class Meta:
         ordering = ['-amount']
-
-
 
 
 class Comment(models.Model):

@@ -1,14 +1,13 @@
-from django.test import TestCase
-
-
-from django.test import TestCase, Client
-from django.urls import reverse
-from .models import Listing, Category, User, Bid
 from decimal import Decimal
+
+from django.test import TestCase
+from django.urls import reverse
+
+from .models import Listing, Category, User, Bid
+
 
 class AuctionTests(TestCase):
     def setUp(self):
-
         self.user = User.objects.create_user(username="testuser", password="password123")
         self.category = Category.objects.create(name="Electronics", slug="electronics")
         self.listing = Listing.objects.create(
@@ -52,8 +51,6 @@ class AuctionTests(TestCase):
         # 1. Check that we stayed on the page (didn't redirect)
         self.assertEqual(response.status_code, 200)
 
-
-
         # 3. Double-check the database to ensure price hasn't changed
         self.listing.refresh_from_db()
         self.assertContains(response, "you must bid higher than $500.00")
@@ -93,7 +90,7 @@ class AuctionTests(TestCase):
 
     def test_category_listings_filter(self):
         """Test that the category page filters correctly    """
-        #create a different category item
+        # create a different category item
         other_cat = Category.objects.create(name="Books", slug="books")
         Listing.objects.create(
             title="Python Book",
@@ -110,17 +107,13 @@ class AuctionTests(TestCase):
         self.assertNotContains(response, "Python Book")
 
     def test_winner_message_display(self):
-
         winner = User.objects.create_user(username="winner", password="password123")
         Bid.objects.create(user=winner, auction=self.listing, amount=600.00)
-
 
         self.listing.is_active = False
         self.listing.save()
 
         self.client.login(username="winner", password="password123")
         response = self.client.get(reverse("auction_view", kwargs={"pk": self.listing.id}))
-
-
 
         self.assertNotContains(response, 'name="bid"')
