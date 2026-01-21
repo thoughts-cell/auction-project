@@ -1,3 +1,22 @@
 body {
     padding: 10px;
 }
+.dropdown-content li > a {
+    color: #26a69a ;
+}
+
+.dropdown-content li > a:hover {
+    color: #26a69a ;
+}
+
+.dropdown-content {
+    background-color: #4CAF50 ;
+}
+
+.dropdown-content li {
+    background-color: #4CAF50 
+}
+
+.dropdown-content li > a {
+    color: white ;
+}

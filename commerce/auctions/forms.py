@@ -22,7 +22,7 @@ class NewAuctionForm(forms.ModelForm):
             'description': 'description of product',
             'image_url': 'url of image(optional)',
             'starting_bid': 'starting price',
-            'category': 'choose a category',
+            'category': '',
         }
 
 class BidForm(forms.ModelForm):
