@@ -1,28 +1,33 @@
 from django.contrib import admin
-
-from .models import Bid, Category, Listing
-
-
-# Admin for Listing (Auction)
-class AuctionAdmin(admin.ModelAdmin):
-    list_display = ('title', 'category', 'starting_bid', 'current_price', 'is_active', 'user')
-    list_filter = ('is_active', 'category')
-    search_fields = ('title', 'description')
+from .models import User, Category, Listing, Bid, Comment
 
 
-# Admin for Bid
-class BidAdmin(admin.ModelAdmin):
-    list_display = ('auction', 'user', 'amount', 'timestamp')
-    list_filter = ('timestamp',)
-
-
-# Admin for Category
+@admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug')
-    prepopulated_fields = {'slug': ('name',)}
+    list_display = ['name', 'slug']
+    search_fields = ['name']
 
 
-# Register models
-admin.site.register(Listing, AuctionAdmin)
-admin.site.register(Bid, BidAdmin)
-admin.site.register(Category, CategoryAdmin)
+@admin.register(Listing)
+class ListingAdmin(admin.ModelAdmin):
+    list_display = ['title', 'user', 'category', 'starting_bid', 'current_price', 'is_active']
+    list_filter = ['is_active', 'category', 'user']
+    search_fields = ['title', 'description']
+    readonly_fields = ['current_price']
+
+
+@admin.register(Bid)
+class BidAdmin(admin.ModelAdmin):
+    list_display = ['amount', 'auction', 'user', 'timestamp']
+    list_filter = ['timestamp', 'auction']
+    search_fields = ['auction__title', 'user__username']
+    readonly_fields = ['timestamp']
+
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ['user', 'auction', 'created_on']
+    list_filter = ['created_on', 'auction']
+    search_fields = ['body', 'user__username', 'auction__title']
+    readonly_fields = ['created_on']
+

@@ -41,12 +41,14 @@ I have included a helper script to make setup easier. Run the following command 
 python setup_env.py
 ```
 ###  4. Database Setup
-Apply the migrations to initialize the SQLite database:
+Apply the migrations to initialize the SQLite database. This will automatically create the database schema and populate 8 default categories:
 
  
 ```bash
 python manage.py migrate
 ```
+
+**Default Categories:** Electronics, Fashion, Home & Garden, Sports & Outdoors, Toys & Games, Books, Music, and Art & Collectibles.
 
 ### 5. Start the Server
 
