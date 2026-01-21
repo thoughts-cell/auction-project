@@ -3,6 +3,10 @@ from .models import Listing, Category, Bid, Comment
 
 
 class NewAuctionForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['category'].empty_label = None
+
     class Meta:
         model = Listing
         fields = ['title', 'description', 'image_url', 'starting_bid','category']
@@ -11,7 +15,7 @@ class NewAuctionForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'materialize-textarea'}),
             'image_url': forms.URLInput(attrs={'placeholder': 'https://example.com/image.jpg'}),
             'starting_bid': forms.NumberInput(attrs={'step': '0.01'}),
-            'category':forms.Select(attrs={'class':'browser-default'}),
+            'category': forms.Select(attrs={'class':'browser-default'}, choices=[]),
         }
         labels = {
             'title': 'product name',
