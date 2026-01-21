@@ -3,10 +3,25 @@ from .models import Listing, Category, Bid, Comment
 
 
 class NewAuctionForm(forms.ModelForm):
+    image_url = forms.CharField(
+        required=False, 
+        widget=forms.URLInput(attrs={
+            'placeholder': 'https://example.com/image.jpg',
+            'class': 'validate'
+        }),
+        label='url of image(optional)'
+    )
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['category'].empty_label = "Select a category"
         self.fields['category'].queryset = Category.objects.all()
+
+    def clean_image_url(self):
+        image_url = self.cleaned_data.get('image_url')
+        if image_url and not image_url.startswith(('http://', 'https://')):
+            image_url = 'https://' + image_url
+        return image_url if image_url else None
 
     class Meta:
         model = Listing
@@ -14,14 +29,12 @@ class NewAuctionForm(forms.ModelForm):
         widgets = {
             'title': forms.TextInput(attrs={'class': 'validate'}),
             'description': forms.Textarea(attrs={'class': 'materialize-textarea'}),
-            'image_url': forms.URLInput(attrs={'placeholder': 'https://example.com/image.jpg'}),
             'starting_bid': forms.NumberInput(attrs={'step': '0.01'}),
             'category': forms.Select(attrs={'class':'browser-default'}),
         }
         labels = {
             'title': 'product name',
             'description': 'description of product',
-            'image_url': 'url of image(optional)',
             'starting_bid': 'starting price',
             'category': '',
         }
