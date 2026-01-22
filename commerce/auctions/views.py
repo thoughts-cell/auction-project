@@ -147,6 +147,14 @@ def auction_view(request, pk):
                     temp.auction = auction
                     temp.save()
                     return redirect("auction_view", pk=auction.pk)
+        if 'comment' in request.POST:
+            comment_form = CommentForm(request.POST)
+            if comment_form.is_valid():
+                temp = comment_form.save(commit=False)
+                temp.user = request.user
+                temp.auction = auction
+                temp.save()
+                return redirect("auction_view", pk=auction.pk)
 
     return render(request, "auctions/auction_view.html", {
         "auction": auction,
@@ -162,8 +170,14 @@ def auction_view(request, pk):
 def end_auction(request, pk):
     auction = get_object_or_404(Listing, pk=pk)
     if request.user.is_authenticated and request.user == auction.user:
+        # Get the highest bid to determine the winner
+        highest_bid = auction.bids.order_by("-amount").first()
+        if highest_bid:
+            auction.winner = highest_bid.user
+        
         auction.is_active = False
         auction.save()
+        messages.success(request, "Auction closed successfully!")
     return HttpResponseRedirect(reverse("auction_view", args=[pk]))
 
 

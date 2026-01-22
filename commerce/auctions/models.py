@@ -26,6 +26,7 @@ class Listing(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name="listings")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="listings")
     is_active = models.BooleanField(default=True)
+    winner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="won_auctions")
     favoured = models.ManyToManyField(User, blank=True, related_name="favoured")
 
     def __str__(self):
