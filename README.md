@@ -24,7 +24,7 @@ To follow industry best practices, this project uses **environment variables** t
 ### 1. Clone the repository
  ```bash
 git clone [https://github.com/thoughts-cell/auction-project](https://github.com/thoughts-cell/auction-project)
-cd auction-project/commerce
+cd ./auction-project/commerce/
  ```
 
 ### 2. Install Dependencies
